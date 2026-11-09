@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Synapse Lab: MDMA</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f3fb;--card:#fff;--ink:#1c1f3a;--mute:#5b5f80;--line:#dcd8ee;--v:#5b3fd9;--vs:#ebe6ff;--g:#0f8f74;--gs:#dcf5ee;--r:#c23a4b;--rs:#fde4e7;--a:#b86e00;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12132a;--card:#1c1e3d;--ink:#eceafb;--mute:#a4a8cc;--line:#34376a;--v:#9c86ff;--vs:#2b2763;--g:#3fd1ad;--gs:#14403a;--r:#ff7d8c;--rs:#4a2030;--a:#f2b24a}}
+:root[data-theme="dark"]{--bg:#12132a;--card:#1c1e3d;--ink:#eceafb;--mute:#a4a8cc;--line:#34376a;--v:#9c86ff;--vs:#2b2763;--g:#3fd1ad;--gs:#14403a;--r:#ff7d8c;--rs:#4a2030;--a:#f2b24a}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:clamp(2rem,7vw,3.2rem);line-height:1.05;margin:.3em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.5rem;margin:0 0 .3em;font-weight:800}
+p{margin:.4em 0}.mute{color:var(--mute)}
+.bar{display:flex;gap:6px;margin:14px 0 22px}.bar i{flex:1;height:8px;border-radius:4px;background:var(--line)}.bar i.on{background:var(--v)}.bar i.done{background:var(--g)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:20px}
+button{font:inherit;cursor:pointer;border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 16px;font-weight:600}
+button:hover{background:var(--vs)}button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--v);outline-offset:2px}
+button.go{background:var(--v);border-color:var(--v);color:#fff}button.go:hover{opacity:.9;background:var(--v)}
+button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.fb{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:.97rem}.ok{background:var(--gs);border-left:6px solid var(--g)}.no{background:var(--rs);border-left:6px solid var(--r)}
+.claim{font-size:1.25rem;font-weight:600;line-height:1.35;margin:10px 0}
+.opt{display:block;width:100%;text-align:left;margin-top:8px}
+.opt.right{background:var(--gs);border-color:var(--g)}.opt.wrong{background:var(--rs);border-color:var(--r)}
+.step{display:flex;gap:10px;align-items:center;width:100%;text-align:left;margin-top:8px;padding:12px}
+.step b{min-width:30px;height:30px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:.9rem}
+.step.placed{background:var(--gs);border-color:var(--g)}.step.placed b{background:var(--g);color:#fff}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+.m{display:grid;grid-template-columns:1fr;gap:6px;margin-top:12px;padding:12px;border:2px solid var(--line);border-radius:12px}
+.m.ok{border-color:var(--g)}.m.no{border-color:var(--r)}
+select,textarea,input{font:inherit;width:100%;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.tag{display:inline-block;font-size:.85rem;font-weight:600;padding:2px 10px;border-radius:99px;background:var(--vs);color:var(--v)}
+.tl{border-left:4px solid var(--v);margin:16px 0 0 8px;padding-left:16px}.tl div{margin-bottom:12px}.tl b{color:var(--v)}
+.score{font-size:3rem;font-weight:800;color:var(--v);line-height:1}
+.note{font-size:.88rem;color:var(--mute);margin-top:22px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<main>
+<div class="tag">Self-paced, about 20 minutes</div>
+<h1>Synapse Lab: What does MDMA actually do?</h1>
+<p class="mute">Four stations, one brain chemistry mystery. This activity is for learning the science, not for guiding use. Earn points as you go and finish with a summary to submit.</p>
+<div class="bar" id="bar"></div>
+<div id="stage"></div>
+<p class="note">Educational content only. Legal status and clinical research on MDMA change quickly, so check current sources (FDA, DEA, NIDA) for the latest. If you or someone you know needs help with substance use, contact SAMHSA’s helpline at 1-800-662-4357 or your campus health center.</p>
+</main>
+<script>
+var S=4,cur=-1,pts=0,max=0,log=[];
+var $=function(i){return document.getElementById(i)};
+function bar(){$("bar").innerHTML=[0,1,2,3].map(function(i){return '<i class="'+(i<cur?"done":i==cur?"on":"")+'"></i>'}).join("")}
+function show(h){$("stage").innerHTML='<div class="card">'+h+'</div>';bar();window.scrollTo({top:0})}
+function nextBtn(label){return '<div class="row"><button class="go" id="nx" disabled onclick="go()">'+(label||"Next station")+'</button></div>'}
+function go(){cur++;if(cur==0)st1();else if(cur==1)st2();else if(cur==2)st3();else if(cur==3)st4();else fin()}
+function intro(){show('<h2>Your mission</h2><p>You’re a neuroscience lab intern. Your supervisor wants you to explain MDMA (3,4-methylenedioxymethamphetamine) to a skeptical audience: what it does in the brain, what the risks are, and why researchers study it at all.</p><p class="mute">Tip: wrong answers cost you nothing but a quick explanation. Read the feedback, since that’s where the learning happens.</p><div class="row"><button class="go" onclick="go()">Start Station 1</button></div>')}
+
+/* Station 1 */
+var claims=[
+["“Ecstasy,” “Molly,” and pure MDMA are all the same thing.",false,"Myth. Street products sold under these names often contain other drugs (like synthetic cathinones) or mixtures, and users usually can’t know what they have. This unpredictability is a major source of harm."],
+["MDMA’s main action is causing a large release of serotonin from neurons.",true,"Fact. MDMA enters serotonin neurons through the serotonin transporter (SERT) and makes them dump serotonin into the synapse. It also boosts dopamine and norepinephrine, to a lesser degree."],
+["Drinking as much water as possible is the safest way to avoid overheating.",false,"Myth. Overheating is a real risk, but extreme water intake can cause hyponatremia (dangerously low blood sodium), which has been linked to MDMA-related deaths. MDMA also affects the body’s water-handling hormones."],
+["MDMA-assisted therapy has been tested in clinical trials for PTSD.",true,"Fact. Phase 3 trials were run, and the FDA granted Breakthrough Therapy status in 2017. In 2024 the FDA declined to approve the first application and asked for more data. Check for newer updates."],
+["MDMA is a classic psychedelic that works mainly by directly activating 5-HT2A receptors, like LSD.",false,"Myth. MDMA is usually called an entactogen (or empathogen): it works mostly by releasing monoamines, not by directly acting as a strong 5-HT2A agonist. It has some overlap with stimulants and some with psychedelics."],
+["A drug being studied for therapy means it’s safe to use on your own.",false,"Myth. Clinical trials involve screening, controlled doses, pure compounds, and trained monitoring. Those conditions don’t exist at a party, and screening excludes people with certain heart conditions or medications."]
+];
+var c1=0;
+function st1(){c1=0;claim()}
+function claim(){
+ if(c1>=claims.length){return st1done()}
+ var c=claims[c1];
+ show('<span class="tag">Station 1 of 4: Myth or fact?</span><p class="mute">Claim '+(c1+1)+' of '+claims.length+'</p><div class="claim">'+c[0]+'</div><div class="row"><button onclick="ans(true)">Fact</button><button onclick="ans(false)">Myth</button></div><div id="f"></div>')}
+function ans(v){
+ var c=claims[c1],ok=v==c[1];max++;if(ok)pts++;
+ $("f").innerHTML='<div class="fb '+(ok?"ok":"no")+'"><b>'+(ok?"Correct! ":"Not quite. ")+'</b>'+c[2]+'</div><div class="row"><button class="go" onclick="c1++;claim()">'+(c1==claims.length-1?"Finish station":"Next claim")+'</button></div>';
+ [].forEach.call(document.querySelectorAll(".row button"),function(b){b.disabled=true});
+ $("f").querySelector("button").disabled=false}
+function st1done(){log.push("Station 1 (myth/fact) complete");go()}
+
+/* Station 2 */
+var order=["MDMA is taken up into a serotonin neuron by the serotonin transporter (SERT).","Inside the neuron, MDMA disrupts vesicle storage so serotonin builds up in the cytoplasm.","SERT runs in reverse, pushing serotonin out into the synapse.","Excess serotonin stimulates receptors on the next neuron, altering mood and social feeling.","Days later, serotonin stores are partly depleted, which may contribute to the “comedown.”"];
+var sh2,nxt2,err2;
+function st2(){nxt2=0;err2=0;sh2=order.map(function(t,i){return i}).sort(function(a,b){return ((a*7+3)%5)-((b*7+3)%5)});draw2()}
+function draw2(){
+ var h='<span class="tag">Station 2 of 4: Rebuild the synapse</span><p>Click the five events in the order they happen. Start with what happens first.</p><div id="s2">';
+ sh2.forEach(function(i){var p=i<nxt2;h+='<button class="step '+(p?"placed":"")+'" id="b'+i+'" '+(p?"disabled":"")+' onclick="pick('+i+')"><b>'+(p?i+1:"?")+'</b><span>'+order[i]+'</span></button>'});
+ h+='</div><div id="f2"></div>'+nextBtn();show(h);if(nxt2>=5)fin2()}
+function pick(i){
+ if(i==nxt2){nxt2++;draw2()}else{err2++;var b=$("b"+i);b.classList.add("shake");setTimeout(function(){b.classList.remove("shake")},400);$("f2").innerHTML='<div class="fb no">Not yet. Ask yourself: what has to happen before that step can occur? ('+err2+' miss'+(err2>1?"es":"")+')</div>'}}
+function fin2(){var p=Math.max(0,5-err2);pts+=p;max+=5;log.push("Station 2 (synapse order): "+p+"/5");
+ $("f2").innerHTML='<div class="fb ok"><b>Sequence complete: '+p+'/5 points.</b> Notice that MDMA doesn’t mimic serotonin at the receptor. It forces the <i>release</i> of serotonin, which is why it’s called a releasing agent.</div>';$("nx").disabled=false}
+
+/* Station 3 */
+var NT=["Serotonin","Dopamine","Norepinephrine","Oxytocin (hormone)"];
+var items=[["Warmth, emotional openness, mood lift",0,"Serotonin is central to MDMA’s signature mood and emotional effects."],["Euphoria, reward, and motivation",1,"Dopamine release contributes to the reward and stimulant-like qualities."],["Raised heart rate and blood pressure, alertness",2,"Norepinephrine drives the sympathetic “fight-or-flight” stimulation, which is why cardiovascular risk matters."],["Feelings of closeness and trust toward others",3,"Studies suggest MDMA increases oxytocin, which may contribute to social bonding effects. The exact causal role is still being researched."]];
+function st3(){
+ var h='<span class="tag">Station 3 of 4: Match the system</span><p>Which chemical is most linked to each effect? Choose, then check.</p>';
+ items.forEach(function(it,i){h+='<div class="m" id="m'+i+'"><b>'+it[0]+'</b><select id="sel'+i+'"><option value="">Choose…</option>'+NT.map(function(n,j){return '<option value="'+j+'">'+n+'</option>'}).join("")+'</select><div id="mf'+i+'" class="mute"></div></div>'});
+ h+='<div class="row"><button class="go" onclick="chk3()">Check my answers</button></div>'+nextBtn();show(h)}
+function chk3(){var p=0;
+ for(var i=0;i<items.length;i++){var v=$("sel"+i).value,ok=v!==""&&+v==items[i][1];if(ok)p++;
+  $("m"+i).className="m "+(ok?"ok":"no");$("mf"+i).textContent=(ok?"Yes. ":"Answer: "+NT[items[i][1]]+". ")+items[i][2]}
+ pts+=p;max+=4;log.push("Station 3 (neurochemistry match): "+p+"/4");$("nx").disabled=false;document.querySelector(".go").disabled=true}
+
+/* Station 4 */
+var sc=[
+["At a crowded, hot event, a person who took MDMA feels extremely hot, dizzy, and confused, and has stopped sweating. What is the best response?",["Tell them to keep dancing to “work it out”","Move them somewhere cool, and call emergency services right away","Have them chug several liters of water immediately","Wait an hour to see if it passes"],1,"Hyperthermia can become life-threatening fast. Cooling and emergency care are the priority. Forcing huge amounts of water can add a second danger (hyponatremia)."],
+["A person taking an SSRI or MAOI antidepressant hears that MDMA is “just a mood booster.” What’s the key pharmacological concern?",["None, since they both help mood","Combining serotonin-affecting drugs can cause serotonin syndrome, a medical emergency","MDMA will cancel the antidepressant, so it’s harmless","It only matters for older adults"],1,"Serotonin syndrome (agitation, high temperature, rigid muscles, rapid heart rate) can occur when serotonergic drugs are combined. MAOIs are especially dangerous with MDMA."],
+["A researcher says a pill sold as “MDMA” tested positive on a reagent kit. What does that tell you?",["The pill is pure and safe","It’s the right dose","It suggests MDMA-like compounds are present, but not purity, dose, or absence of other substances","Nothing at all, since testing is useless"],2,"Reagent and test strips can flag some substances but can’t confirm purity or dose. That’s a harm-reduction tool with real limits, not a guarantee of safety."]];
+var c4=0;
+function st4(){c4=0;q4()}
+function q4(){
+ if(c4>=sc.length){log.push("Station 4 (risk detective) complete");return go()}
+ var q=sc[c4];
+ var h='<span class="tag">Station 4 of 4: Risk detective</span><p class="mute">Case '+(c4+1)+' of '+sc.length+'</p><div class="claim">'+q[0]+'</div>';
+ q[1].forEach(function(o,i){h+='<button class="opt" id="o'+i+'" onclick="a4('+i+')">'+o+'</button>'});
+ show(h+'<div id="f4"></div>')}
+function a4(i){var q=sc[c4],ok=i==q[2];max++;if(ok)pts++;
+ [].forEach.call(document.querySelectorAll(".opt"),function(b){b.disabled=true});
+ $("o"+q[2]).classList.add("right");if(!ok)$("o"+i).classList.add("wrong");
+ $("f4").innerHTML='<div class="fb '+(ok?"ok":"no")+'"><b>'+(ok?"Correct! ":"Not quite. ")+'</b>'+q[3]+'</div><div class="row"><button class="go" onclick="c4++;q4()">'+(c4==sc.length-1?"See my results":"Next case")+'</button></div>'}
+
+/* Finale */
+function fin(){
+ var pc=Math.round(100*pts/max),rank=pc>=85?"Principal Investigator":pc>=65?"Postdoc":"Lab Intern (keep going!)";
+ show('<h2>Lab complete</h2><div class="score">'+pts+'/'+max+'</div><p>Your rank: <b>'+rank+'</b></p>'+
+ '<div class="tl"><div><b>1912</b> Merck patents MDMA as a chemical intermediate, not as a diet pill.</div><div><b>1970s</b> Chemist Alexander Shulgin helps bring MDMA to psychotherapists.</div><div><b>1985</b> The DEA emergency-schedules MDMA as a Schedule I drug in the U.S.</div><div><b>2017</b> FDA grants Breakthrough Therapy designation for MDMA-assisted therapy for PTSD.</div><div><b>2024</b> FDA declines the first approval request and asks for more trial data. Look up what has happened since.</div></div>'+
+ '<h2 style="margin-top:18px">Reflect</h2><p>In 3 to 5 sentences: why might it be hard to run a blinded trial of MDMA, and how does that affect how we interpret the results?</p><textarea id="refl" rows="5" placeholder="Type your reflection here…"></textarea>'+
+ '<p style="margin-top:12px">Your name</p><input id="nm" autocomplete="name" placeholder="First and last name">'+
+ '<div class="row"><button class="go" onclick="copySum()">Copy my summary</button><button onclick="cur=-1;pts=0;max=0;log=[];intro()">Restart</button></div><div id="cp" class="mute"></div>');
+ var b=$("bar");b.innerHTML=[0,1,2,3].map(function(){return '<i class="done"></i>'}).join("")}
+function copySum(){
+ var t="Synapse Lab: MDMA\nName: "+($("nm").value||"(not entered)")+"\nScore: "+pts+"/"+max+"\n"+log.join("\n")+"\nReflection: "+($("refl").value||"(blank)");
+ var done=function(){$("cp").textContent="Copied! Paste it into your course submission."};
+ var fb=function(){var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){$("cp").textContent="Couldn’t copy automatically. Select and copy your answers manually."}document.body.removeChild(ta)};
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,fb)}else fb()}
+bar();intro();
+</script>
+</body>
+</html>
